@@ -28,10 +28,6 @@ LIGHT_COLOR, DARK_COLOR = THEMES[theme_index]
 PIECE_TYPES = ['pawn', 'rook', 'knight', 'bishop', 'queen', 'king']
 IMAGES = {}
 
-black_time_left = [10,0,600]
-white_time_left = [10,0,600]
-last_time_update = pygame.time.get_ticks()  # Track when we last updated the timer
-
 
 
 for color in ['white', 'black']:
@@ -39,22 +35,22 @@ for color in ['white', 'black']:
         if color == 'white':
           # replace this with your own path to the images (white images here)
             path_map = {
-                'pawn': 'white pawn.png',
-                'rook': 'white rook.png',
-                'knight': 'white knight.png',
-                'bishop': 'white bishop.png',
-                'queen': 'white queen.png',
-                'king': 'white king.png'
+                'pawn': 'Chess engine/white pawn.png',
+                'rook': 'Chess engine/white rook.png',
+                'knight': 'Chess engine/white knight.png',
+                'bishop': 'Chess engine/white bishop.png',
+                'queen': 'Chess engine/white queen.png',
+                'king': 'Chess engine/white king.png'
             }
         else:
           # replace this with your own path to the iamges (black images here)
             path_map = {
-                'pawn': 'black pawn.png',
-                'rook': 'black rook.png',
-                'knight': 'black knight.png',
-                'bishop': 'black bishop.png',
-                'queen': 'black queen.png',
-                'king': 'black king.png'
+                'pawn': 'Chess engine/black pawn.png',
+                'rook': 'Chess engine/black rook.png',
+                'knight': 'Chess engine/black knight.png',
+                'bishop': 'Chess engine/black bishop.png',
+                'queen': 'Chess engine/black queen.png',
+                'king': 'Chess engine/black king.png'
             }
         IMAGES[(color, piece)] = pygame.transform.scale(pygame.image.load(path_map[piece]), (SQUARE_SIZE, SQUARE_SIZE))
 
@@ -134,14 +130,6 @@ while running:
                         # If it's black's turn after white moves (or vice versa)
                         if BOARD.turn == chess.BLACK:
                             time_taken = chess_ai.black_move(BOARD)
-                            black_time_left[2] -= round(time_taken)
-                            if black_time_left[2] <= 0:
-                                winner = 'white'
-                                running = False
-                                break
-
-                        elif BOARD.turn == chess.WHITE:
-                            white_time_left[2] -= 10
                     else:
                         # Invalid move - deselect
                         SELECTED_SQUARE = None
@@ -153,20 +141,6 @@ while running:
                     theme_index = 0
 
     LIGHT_COLOR, DARK_COLOR = THEMES[theme_index]
-
-    # Update white's timer every second when it's white's turn
-    current_time = pygame.time.get_ticks()
-    if current_time - last_time_update >= 1000:  # 1000ms = 1 second
-        if BOARD.turn == chess.WHITE:
-            white_time_left[2] -= 1
-            
-            # Check if white ran out of time
-            if white_time_left[2] <= 0:
-                winner = 'black'
-                running = False
-                break
-        
-        last_time_update = current_time
 
     # Draw the chessboard by iterating over all rows and columns
     for screen_row in range(8):
@@ -305,83 +279,8 @@ while running:
         running = False
         break
 
-    # Convert seconds to minutes and seconds for display
-    white_time_left[1] = white_time_left[2] % 60
-    white_time_left[0] = white_time_left[2] // 60
-    black_time_left[1] = black_time_left[2] % 60
-    black_time_left[0] = black_time_left[2] // 60
-    
-    # Display time on pygame window with improved UI
-    timer_font = pygame.font.Font('freesansbold.ttf', 28)
-    label_font = pygame.font.Font('freesansbold.ttf', 18)
-    
-    # White's timer (left side, above board)
-    white_time_text = f'{white_time_left[0]:02d}:{white_time_left[1]:02d}'
-    white_text = timer_font.render(white_time_text, True, (255, 255, 255))
-    white_text_rect = white_text.get_rect()
-    white_text_rect.center = (50, 100)
-    
-    # White's label
-    white_label = label_font.render('WHITE', True, (200, 200, 200))
-    white_label_rect = white_label.get_rect()
-    white_label_rect.center = (50, 70)
-    
-    # White's timer background
-    white_timer_bg = pygame.Rect(white_text_rect.left - 20, white_text_rect.top - 10, 
-                                white_text_rect.width + 40, white_text_rect.height + 20)
-    pygame.draw.rect(SCREEN, (50, 50, 50), white_timer_bg, border_radius=15)
-    pygame.draw.rect(SCREEN, (100, 100, 100), white_timer_bg, width=2, border_radius=15)
-    
-    # Black's timer (right side, below board)
-    black_time_text = f'{black_time_left[0]:02d}:{black_time_left[1]:02d}'
-    black_text = timer_font.render(black_time_text, True, (255, 255, 255))
-    black_text_rect = black_text.get_rect()
-    black_text_rect.center = (750, 700)
-    
-    # Black's label
-    black_label = label_font.render('BLACK', True, (200, 200, 200))
-    black_label_rect = black_label.get_rect()
-    black_label_rect.center = (750, 730)
-    
-    # Black's timer background
-    black_timer_bg = pygame.Rect(black_text_rect.left - 20, black_text_rect.top - 10, 
-                                black_text_rect.width + 40, black_text_rect.height + 20)
-    pygame.draw.rect(SCREEN, (50, 50, 50), black_timer_bg, border_radius=15)
-    pygame.draw.rect(SCREEN, (100, 100, 100), black_timer_bg, width=2, border_radius=15)
-    
-    # Draw timer elements
-    SCREEN.blit(white_label, white_label_rect)
-    SCREEN.blit(white_text, white_text_rect)
-    SCREEN.blit(black_label, black_label_rect)
-    SCREEN.blit(black_text, black_text_rect)
-    
-    # Add current player indicator
-    current_player = "WHITE" if BOARD.turn == chess.WHITE else "BLACK"
-    current_color = (255, 255, 0) if BOARD.turn == chess.WHITE else (255, 255, 0)  # Yellow for current player
-    
-    # Highlight current player's timer
-    if BOARD.turn == chess.WHITE:
-        pygame.draw.rect(SCREEN, current_color, white_timer_bg, width=3, border_radius=15)
-    else:
-        pygame.draw.rect(SCREEN, current_color, black_timer_bg, width=3, border_radius=15)
-    
-    # Current player text
-    turn_text = f"{current_player}'S TURN"
-    turn_font = pygame.font.Font('freesansbold.ttf', 20)
-    turn_display = turn_font.render(turn_text, True, current_color)
-    turn_rect = turn_display.get_rect()
-    turn_rect.center = (400, 30)
-    
-    # Turn indicator background
-    turn_bg = pygame.Rect(turn_rect.left - 15, turn_rect.top - 5, 
-                          turn_rect.width + 30, turn_rect.height + 10)
-    pygame.draw.rect(SCREEN, (30, 30, 30), turn_bg, border_radius=10)
-    pygame.draw.rect(SCREEN, current_color, turn_bg, width=2, border_radius=10)
-    
-    SCREEN.blit(turn_display, turn_rect)
-    
-
-    pygame.display.flip()
+    # Update the display
+    pygame.display.update()
     clock.tick(60)
 
 pygame.quit()
